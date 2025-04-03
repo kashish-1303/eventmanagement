@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
@@ -24,7 +25,7 @@ mongoose.connect(process.env.MONGODB_URI,{
     useUnifiedTopology: true
 })
 .then(() => console.log('MongoDB connected'))
-.catch(err => console.log('err'));
+.catch(err => console.error('MongoDB connection error:', err));
 
 //routes 
 

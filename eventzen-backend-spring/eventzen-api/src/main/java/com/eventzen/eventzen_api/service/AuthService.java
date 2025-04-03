@@ -13,8 +13,10 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.dao.DataIntegrityViolationException;
 @Service
+@Transactional
 public class AuthService {
 
     @Autowired
@@ -44,21 +46,24 @@ public class AuthService {
     }
 
     public UserDto register(RegisterRequest signUpRequest) {
-        // Check if username or email is already taken
-        if (userService.existsByUsername(signUpRequest.getUsername())) {
-            throw new RuntimeException("Username is already taken");
-        }
+        try {
+            // More specific exception types
+            if (userService.existsByUsername(signUpRequest.getUsername())) {
+                throw new IllegalArgumentException("Username is already taken");
+            }
+            if (userService.existsByEmail(signUpRequest.getEmail())) {
+                throw new IllegalArgumentException("Email is already in use");
+            }
 
-        if (userService.existsByEmail(signUpRequest.getEmail())) {
-            throw new RuntimeException("Email is already in use");
-        }
-
-        // Create a new user account
-        return userService.createUser(
+            return userService.createUser(
                 signUpRequest.getUsername(),
                 signUpRequest.getEmail(),
                 signUpRequest.getPassword(),
-                User.Role.CUSTOMER // Default role for newly registered users
-        );
+                User.Role.CUSTOMER
+            );
+        } catch (DataIntegrityViolationException e) {
+            throw new IllegalArgumentException("Database constraint violation: " + 
+                e.getMostSpecificCause().getMessage());
+        }
     }
 }

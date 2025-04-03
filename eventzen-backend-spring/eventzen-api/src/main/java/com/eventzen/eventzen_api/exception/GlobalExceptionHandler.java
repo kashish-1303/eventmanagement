@@ -1,5 +1,6 @@
 package com.eventzen.eventzen_api.exception;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -37,4 +38,17 @@ public class GlobalExceptionHandler {
                 "An unexpected error occurred");
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
     }
+    @ExceptionHandler(IllegalArgumentException.class)
+public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException ex) {
+    return ResponseEntity.status(HttpStatus.CONFLICT) // 409 Conflict
+        .body(new ErrorResponse(HttpStatus.CONFLICT.value(), ex.getMessage()));
 }
+
+@ExceptionHandler(DataIntegrityViolationException.class)
+public ResponseEntity<ErrorResponse> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
+    String message = "Database error: " + ex.getMostSpecificCause().getMessage();
+    return ResponseEntity.status(HttpStatus.CONFLICT)
+        .body(new ErrorResponse(HttpStatus.CONFLICT.value(), message));
+}
+}
+
