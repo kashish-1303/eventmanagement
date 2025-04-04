@@ -215,6 +215,7 @@
 // export default bookingSlice.reducer;
 
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import bookingService from '../../services/booking.service';
 import { nodeApi } from '../../services/api';
 
 // Async thunks
@@ -241,7 +242,17 @@ export const fetchBookingById = createAsyncThunk(
     }
   }
 );
-
+export const fetchUserBookings = createAsyncThunk(
+  'booking/fetchUserBookings',
+  async (userId, { rejectWithValue }) => {
+    try {
+      const response = await bookingService.getUserBookings(userId);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to fetch bookings');
+    }
+  }
+);
 export const createBooking = createAsyncThunk(
   'bookings/createBooking',
   async (bookingData, { rejectWithValue }) => {
@@ -286,6 +297,14 @@ export const createBookingSuccess = (booking) => {
   };
 };
 
+const initialState = {
+  bookings: [],
+  currentBooking: null,
+  loading: false,
+  error: null,
+  success: false
+};
+
 // Booking slice
 const bookingSlice = createSlice({
   name: 'bookings',
@@ -294,14 +313,31 @@ const bookingSlice = createSlice({
     currentBooking: null,
     loading: false,
     error: null,
+    
   },
   reducers: {
     clearCurrentBooking: (state) => {
       state.currentBooking = null;
-    }
-  },
+    },
+    resetBookingState: (state) => {
+      state.error = null;
+      state.success = false;
+  }},
   extraReducers: (builder) => {
     builder
+    .addCase(fetchUserBookings.pending, (state) => {
+      state.loading = true;
+      state.error = null;
+    })
+    .addCase(fetchUserBookings.fulfilled, (state, action) => {
+      state.loading = false;
+      state.bookings = action.payload;
+    })
+    .addCase(fetchUserBookings.rejected, (state, action) => {
+      state.loading = false;
+      state.error = action.payload;
+    })
+  
       // Handle fetchBookings
       .addCase(fetchBookings.pending, (state) => {
         state.loading = true;
@@ -383,5 +419,6 @@ const bookingSlice = createSlice({
   }
 });
 
+export const { resetBookingState } = bookingSlice.actions;
 export const { clearCurrentBooking } = bookingSlice.actions;
 export default bookingSlice.reducer;
