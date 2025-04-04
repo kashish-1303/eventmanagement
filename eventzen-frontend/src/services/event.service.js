@@ -7,6 +7,7 @@ const EventService = {
   },
   
   getEventById: async (id) => {
+    console.log("Fetching event with ID from service:", id);
     return await springApi.get(`/events/${id}`);
   },
   

@@ -6,10 +6,11 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
-
+import java.util.UUID;
 @Repository
-public interface EventRepository extends JpaRepository<Event, String> {
+public interface EventRepository extends JpaRepository<Event, UUID> {
     List<Event> findByStartTimeAfter(LocalDateTime date);
     List<Event> findByCategory(Event.Category category);
-    List<Event> findByVenueId(String venueId);
+    List<Event> findByVenueId(UUID venueId);
 }
+

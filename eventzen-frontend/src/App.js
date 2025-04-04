@@ -106,7 +106,7 @@ function App() {
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/events" element={<Events />} />
-                <Route path="/events/:id" element={<EventDetail />} />
+                <Route path="/events/:eventId" element={<EventDetail />} />
                 <Route path="/venues" element={<Venues />} />
                 
                 {/* Protected routes */}

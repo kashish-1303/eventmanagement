@@ -45,7 +45,7 @@ const Events = () => {
             onChange={handleSearch}
           />
           
-          <div className="flex flex-wrap gap-2 mt-2 sm:mt-0">
+          {/* <div className="flex flex-wrap gap-2 mt-2 sm:mt-0">
             {['ALL', 'SOCIAL', 'CORPORATE', 'SPORTS', 'TECH'].map((category) => (
               <Button 
                 key={category}
@@ -56,7 +56,7 @@ const Events = () => {
                 {category}
               </Button>
             ))}
-          </div>
+          </div> */}
         </div>
       </div>
 

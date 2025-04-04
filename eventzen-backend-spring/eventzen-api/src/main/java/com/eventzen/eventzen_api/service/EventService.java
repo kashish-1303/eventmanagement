@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
-
+import java.util.UUID;
 @Service
 public class EventService {
 
@@ -36,11 +36,15 @@ public class EventService {
                 .collect(Collectors.toList());
     }
 
-    public EventDto getEventById(String id) {
-        Event event = eventRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Event not found with id: " + id));
-        return convertToDTO(event);
-    }
+    
+
+public EventDto getEventById(String id) {
+    UUID uuid = UUID.fromString(id);
+    Event event = eventRepository.findById(uuid)
+            .orElseThrow(() -> new ResourceNotFoundException("Event not found with id: " + id));
+    return convertToDTO(event);
+}
+
 
     public List<EventDto> getUpcomingEvents() {
         return eventRepository.findByStartTimeAfter(LocalDateTime.now()).stream()
@@ -55,10 +59,12 @@ public class EventService {
     }
 
     public List<EventDto> getEventsByVenue(String venueId) {
-        return eventRepository.findByVenueId(venueId).stream()
+        UUID venueUUID = UUID.fromString(venueId);
+        return eventRepository.findByVenueId(venueUUID).stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
+    
 
     public EventDto createEvent(CreateEventRequest request) {
         Event event = new Event();
@@ -76,8 +82,11 @@ public class EventService {
     }
 
     public EventDto updateEvent(String id, UpdateEventRequest request) {
-        Event event = eventRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Event not found with id: " + id));
+        UUID uuid = UUID.fromString(id);
+        Event event = eventRepository.findById(uuid)
+    .orElseThrow(() -> new ResourceNotFoundException("Event not found with id: " + uuid));
+
+    
         
         event.setTitle(request.getTitle());
         event.setStartTime(request.getStartTime());
@@ -95,15 +104,18 @@ public class EventService {
     }
 
     public void deleteEvent(String id) {
-        if (!eventRepository.existsById(id)) {
+        UUID uuid = UUID.fromString(id);
+        if (!eventRepository.existsById(uuid)) {
             throw new ResourceNotFoundException("Event not found with id: " + id);
         }
-        eventRepository.deleteById(id);
+        eventRepository.deleteById(uuid);
     }
+    
 
     public EventDto convertToDTO(Event event) {
         EventDto dto = new EventDto();
-        dto.setId(event.getId());
+        dto.setId(event.getId().toString());
+
         dto.setTitle(event.getTitle());
         dto.setStartTime(event.getStartTime());
         dto.setEndTime(event.getEndTime());

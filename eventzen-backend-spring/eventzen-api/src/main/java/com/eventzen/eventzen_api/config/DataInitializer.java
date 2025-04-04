@@ -1,13 +1,14 @@
-// Create this file: eventzen-backend-spring/eventzen-api/src/main/java/com/eventzen/eventzen_api/config/DataInitializer.java
-
 package com.eventzen.eventzen_api.config;
+
 
 import com.eventzen.eventzen_api.entity.Event;
 import com.eventzen.eventzen_api.entity.User;
 import com.eventzen.eventzen_api.entity.Venue;
+
 import com.eventzen.eventzen_api.repository.EventRepository;
 import com.eventzen.eventzen_api.repository.UserRepository;
 import com.eventzen.eventzen_api.repository.VenueRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
@@ -20,15 +21,18 @@ import java.util.Arrays;
 
 @Configuration
 public class DataInitializer {
-
+    
     @Bean
     CommandLineRunner initDatabase(
             VenueRepository venueRepository,
             EventRepository eventRepository,
             UserRepository userRepository,
+         
             @Autowired PasswordEncoder passwordEncoder
     ) {
         return args -> {
+            System.out.println("Seeding database...");
+            
             // Add venues
             Venue venue1 = new Venue();
             venue1.setName("Grand Hall");
@@ -56,29 +60,31 @@ public class DataInitializer {
             
             venueRepository.saveAll(Arrays.asList(venue1, venue2, venue3, venue4));
             
-            // Create a test admin user
+            // Create users
             User adminUser = new User();
             adminUser.setUsername("admin");
             adminUser.setEmail("admin@eventzen.com");
             adminUser.setPasswordHash(passwordEncoder.encode("admin123"));
             adminUser.setRole(User.Role.ADMIN);
+            adminUser.setCreatedAt(LocalDateTime.now());
             
-            // Create a test customer user
             User customerUser = new User();
             customerUser.setUsername("customer");
             customerUser.setEmail("customer@example.com");
             customerUser.setPasswordHash(passwordEncoder.encode("customer123"));
             customerUser.setRole(User.Role.CUSTOMER);
+            customerUser.setCreatedAt(LocalDateTime.now());
             
             userRepository.saveAll(Arrays.asList(adminUser, customerUser));
             
-            // Add events
+            // Add events - now with user associations
             Event event1 = new Event();
             event1.setTitle("Tech Conference 2025");
             event1.setStartTime(LocalDateTime.now().plusDays(30));
             event1.setEndTime(LocalDateTime.now().plusDays(30).plusHours(8));
             event1.setCategory(Event.Category.TECH);
             event1.setVenue(venue2);
+            event1.setUser(adminUser); // Setting the user that created this event
             
             Event event2 = new Event();
             event2.setTitle("Annual Business Summit");
@@ -86,6 +92,7 @@ public class DataInitializer {
             event2.setEndTime(LocalDateTime.now().plusDays(46));
             event2.setCategory(Event.Category.CORPORATE);
             event2.setVenue(venue1);
+            event2.setUser(adminUser); // Setting the user that created this event
             
             Event event3 = new Event();
             event3.setTitle("Spring Music Festival");
@@ -93,22 +100,13 @@ public class DataInitializer {
             event3.setEndTime(LocalDateTime.now().plusDays(60).plusHours(10));
             event3.setCategory(Event.Category.SOCIAL);
             event3.setVenue(venue3);
+            event3.setUser(customerUser); // Setting the user that created this event
             
-            Event event4 = new Event();
-            event4.setTitle("Developer Workshop");
-            event4.setStartTime(LocalDateTime.now().plusDays(15));
-            event4.setEndTime(LocalDateTime.now().plusDays(15).plusHours(6));
-            event4.setCategory(Event.Category.TECH);
-            event4.setVenue(venue2);
+            eventRepository.saveAll(Arrays.asList(event1, event2, event3));
             
-            Event event5 = new Event();
-            event5.setTitle("Sports Tournament");
-            event5.setStartTime(LocalDateTime.now().plusDays(90));
-            event5.setEndTime(LocalDateTime.now().plusDays(91));
-            event5.setCategory(Event.Category.SPORTS);
-            event5.setVenue(venue1);
+           
             
-            eventRepository.saveAll(Arrays.asList(event1, event2, event3, event4, event5));
+            System.out.println("Database seeding completed successfully.");
         };
     }
 }

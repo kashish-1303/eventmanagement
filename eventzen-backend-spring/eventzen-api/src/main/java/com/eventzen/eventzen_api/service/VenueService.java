@@ -68,7 +68,7 @@ public class VenueService {
 
     public VenueDto convertToDto(Venue venue) {
         VenueDto dto = new VenueDto();
-        dto.setId(venue.getId());
+        dto.setId(venue.getId().toString());
         dto.setName(venue.getName());
         dto.setCapacity(venue.getCapacity());
         dto.setStatus(venue.getStatus().name());

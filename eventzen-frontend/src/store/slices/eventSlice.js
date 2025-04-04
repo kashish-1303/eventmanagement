@@ -1,17 +1,16 @@
 
-
 // import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-// import { nodeApi } from '../../services/api';
+// import { springApi } from '../../services/api'; // Using Spring Boot API client
 
 // // Async thunks
 // export const fetchEvents = createAsyncThunk(
 //   'events/fetchEvents',
 //   async (filters, { rejectWithValue }) => {
 //     try {
-//       const response = await nodeApi.get('/events', { params: filters });
+//       const response = await springApi.get('/events', { params: filters });
 //       return response.data;
 //     } catch (error) {
-//       return rejectWithValue(error.response?.data || 'Failed to fetch events');
+//       return rejectWithValue(error.response?.data?.message || 'Failed to fetch events');
 //     }
 //   }
 // );
@@ -20,23 +19,22 @@
 //   'events/fetchEventById',
 //   async (id, { rejectWithValue }) => {
 //     try {
-//       const response = await nodeApi.get(`/events/${id}`);
+//       const response = await springApi.get(`/events/${id}`);
 //       return response.data;
 //     } catch (error) {
-//       return rejectWithValue(error.response?.data || 'Failed to fetch event');
+//       return rejectWithValue(error.response?.data?.message || 'Failed to fetch event');
 //     }
 //   }
 // );
 
-// // Add the missing fetchEventDetails function
 // export const fetchEventDetails = createAsyncThunk(
 //   'events/fetchEventDetails',
 //   async (id, { rejectWithValue }) => {
 //     try {
-//       const response = await nodeApi.get(`/events/${id}/details`);
+//       const response = await springApi.get(`/events/${id}/details`);
 //       return response.data;
 //     } catch (error) {
-//       return rejectWithValue(error.response?.data || 'Failed to fetch event details');
+//       return rejectWithValue(error.response?.data?.message || 'Failed to fetch event details');
 //     }
 //   }
 // );
@@ -45,10 +43,10 @@
 //   'events/createEvent',
 //   async (eventData, { rejectWithValue }) => {
 //     try {
-//       const response = await nodeApi.post('/events', eventData);
+//       const response = await springApi.post('/events', eventData);
 //       return response.data;
 //     } catch (error) {
-//       return rejectWithValue(error.response?.data || 'Failed to create event');
+//       return rejectWithValue(error.response?.data?.message || 'Failed to create event');
 //     }
 //   }
 // );
@@ -57,10 +55,10 @@
 //   'events/updateEvent',
 //   async ({ id, eventData }, { rejectWithValue }) => {
 //     try {
-//       const response = await nodeApi.put(`/events/${id}`, eventData);
+//       const response = await springApi.put(`/events/${id}`, eventData);
 //       return response.data;
 //     } catch (error) {
-//       return rejectWithValue(error.response?.data || 'Failed to update event');
+//       return rejectWithValue(error.response?.data?.message || 'Failed to update event');
 //     }
 //   }
 // );
@@ -72,7 +70,7 @@
 //     events: [],
 //     currentEvent: null,
 //     loading: false,
-//     error: null,
+//     error: null
 //   },
 //   reducers: {
 //     clearCurrentEvent: (state) => {
@@ -81,7 +79,6 @@
 //   },
 //   extraReducers: (builder) => {
 //     builder
-//       // Handle fetchEvents
 //       .addCase(fetchEvents.pending, (state) => {
 //         state.loading = true;
 //       })
@@ -94,7 +91,6 @@
 //         state.loading = false;
 //         state.error = action.payload;
 //       })
-//       // Handle fetchEventById
 //       .addCase(fetchEventById.pending, (state) => {
 //         state.loading = true;
 //       })
@@ -107,7 +103,6 @@
 //         state.loading = false;
 //         state.error = action.payload;
 //       })
-//       // Handle fetchEventDetails
 //       .addCase(fetchEventDetails.pending, (state) => {
 //         state.loading = true;
 //       })
@@ -120,7 +115,6 @@
 //         state.loading = false;
 //         state.error = action.payload;
 //       })
-//       // Handle other actions...
 //       .addCase(createEvent.pending, (state) => {
 //         state.loading = true;
 //       })
@@ -154,10 +148,9 @@
 
 // export const { clearCurrentEvent } = eventSlice.actions;
 // export default eventSlice.reducer;
-
-// src/store/slices/eventSlice.js
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { springApi } from '../../services/api'; // Using Spring Boot API client
+import { springApi } from '../../services/api';
+import EventService from '../../services/event.service';
 
 // Async thunks
 export const fetchEvents = createAsyncThunk(
@@ -188,7 +181,7 @@ export const fetchEventDetails = createAsyncThunk(
   'events/fetchEventDetails',
   async (id, { rejectWithValue }) => {
     try {
-      const response = await springApi.get(`/events/${id}/details`);
+      const response = await springApi.get(`/events/${id}`); // Remove /details
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Failed to fetch event details');
