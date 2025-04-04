@@ -6,7 +6,7 @@ import BookingList from '../components/bookings/BookingList';
 
 const Bookings = () => {
   const dispatch = useDispatch();
-  const { bookings, loading, error } = useSelector(state => state.booking);
+  const { bookings, loading, error } = useSelector(state => state.bookings);
   const { user } = useSelector(state => state.auth);
 
   useEffect(() => {
