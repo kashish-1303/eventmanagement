@@ -58,9 +58,11 @@ const EventDetail = () => {
   
   // Check if event is still available for booking
   const now = new Date();
-  const eventStartTime = new Date(event.start_time);
+  const eventStartTime = new Date(event.startTime);
   const isEventPast = eventStartTime < now;
-  
+  // Add this right after you access the event state
+console.log("Event state:", event);
+console.log("Event ID from params:", eventId);
   return (
     <div className="container mx-auto py-8 px-4">
       <div className="max-w-4xl mx-auto">

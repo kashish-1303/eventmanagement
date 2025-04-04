@@ -236,8 +236,8 @@ const EventDetails = () => {
                   </svg>
                   <div>
                     <p className="font-medium">Date & Time</p>
-                    <p>{formatDate(currentEvent.start_time)}</p>
-                    <p>{formatTime(currentEvent.start_time)} - {formatTime(currentEvent.end_time)}</p>
+                    <p>{formatDate(currentEvent.startTime)}</p>
+                    <p>{formatTime(currentEvent.startTime)} - {formatTime(currentEvent.endTime)}</p>
                   </div>
                 </div>
               </div>
