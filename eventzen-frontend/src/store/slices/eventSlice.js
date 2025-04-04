@@ -1,53 +1,14 @@
-// // src/store/slices/eventSlice.js
-// import { createSlice } from '@reduxjs/toolkit';
 
-// const initialState = {
-//   events: [],
-//   currentEvent: null,
-//   isLoading: false,
-//   error: null
-// };
 
-// const eventSlice = createSlice({
-//   name: 'events',
-//   initialState,
-//   reducers: {
-//     fetchEventsStart: (state) => {
-//       state.isLoading = true;
-//       state.error = null;
-//     },
-//     fetchEventsSuccess: (state, action) => {
-//       state.isLoading = false;
-//       state.events = action.payload;
-//     },
-//     fetchEventsFailure: (state, action) => {
-//       state.isLoading = false;
-//       state.error = action.payload;
-//     },
-//     setCurrentEvent: (state, action) => {
-//       state.currentEvent = action.payload;
-//     }
-//   }
-// });
-
-// export const {
-//   fetchEventsStart,
-//   fetchEventsSuccess,
-//   fetchEventsFailure,
-//   setCurrentEvent
-// } = eventSlice.actions;
-
-// export default eventSlice.reducer;
-
-// src/store/slices/eventSlice.js
 // import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-// import eventService from '../../services/event.service';
+// import { nodeApi } from '../../services/api';
 
+// // Async thunks
 // export const fetchEvents = createAsyncThunk(
 //   'events/fetchEvents',
-//   async (_, { rejectWithValue }) => {
+//   async (filters, { rejectWithValue }) => {
 //     try {
-//       const response = await eventService.getAllEvents();
+//       const response = await nodeApi.get('/events', { params: filters });
 //       return response.data;
 //     } catch (error) {
 //       return rejectWithValue(error.response?.data || 'Failed to fetch events');
@@ -57,12 +18,25 @@
 
 // export const fetchEventById = createAsyncThunk(
 //   'events/fetchEventById',
-//   async (eventId, { rejectWithValue }) => {
+//   async (id, { rejectWithValue }) => {
 //     try {
-//       const response = await eventService.getEventById(eventId);
+//       const response = await nodeApi.get(`/events/${id}`);
 //       return response.data;
 //     } catch (error) {
 //       return rejectWithValue(error.response?.data || 'Failed to fetch event');
+//     }
+//   }
+// );
+
+// // Add the missing fetchEventDetails function
+// export const fetchEventDetails = createAsyncThunk(
+//   'events/fetchEventDetails',
+//   async (id, { rejectWithValue }) => {
+//     try {
+//       const response = await nodeApi.get(`/events/${id}/details`);
+//       return response.data;
+//     } catch (error) {
+//       return rejectWithValue(error.response?.data || 'Failed to fetch event details');
 //     }
 //   }
 // );
@@ -71,7 +45,7 @@
 //   'events/createEvent',
 //   async (eventData, { rejectWithValue }) => {
 //     try {
-//       const response = await eventService.createEvent(eventData);
+//       const response = await nodeApi.post('/events', eventData);
 //       return response.data;
 //     } catch (error) {
 //       return rejectWithValue(error.response?.data || 'Failed to create event');
@@ -81,9 +55,9 @@
 
 // export const updateEvent = createAsyncThunk(
 //   'events/updateEvent',
-//   async ({eventId, eventData}, { rejectWithValue }) => {
+//   async ({ id, eventData }, { rejectWithValue }) => {
 //     try {
-//       const response = await eventService.updateEvent(eventId, eventData);
+//       const response = await nodeApi.put(`/events/${id}`, eventData);
 //       return response.data;
 //     } catch (error) {
 //       return rejectWithValue(error.response?.data || 'Failed to update event');
@@ -91,16 +65,15 @@
 //   }
 // );
 
-// const initialState = {
-//   events: [],
-//   currentEvent: null,
-//   loading: false,
-//   error: null
-// };
-
+// // Event slice
 // const eventSlice = createSlice({
 //   name: 'events',
-//   initialState,
+//   initialState: {
+//     events: [],
+//     currentEvent: null,
+//     loading: false,
+//     error: null,
+//   },
 //   reducers: {
 //     clearCurrentEvent: (state) => {
 //       state.currentEvent = null;
@@ -111,11 +84,11 @@
 //       // Handle fetchEvents
 //       .addCase(fetchEvents.pending, (state) => {
 //         state.loading = true;
-//         state.error = null;
 //       })
 //       .addCase(fetchEvents.fulfilled, (state, action) => {
-//         state.loading = false;
 //         state.events = action.payload;
+//         state.loading = false;
+//         state.error = null;
 //       })
 //       .addCase(fetchEvents.rejected, (state, action) => {
 //         state.loading = false;
@@ -124,41 +97,53 @@
 //       // Handle fetchEventById
 //       .addCase(fetchEventById.pending, (state) => {
 //         state.loading = true;
-//         state.error = null;
 //       })
 //       .addCase(fetchEventById.fulfilled, (state, action) => {
-//         state.loading = false;
 //         state.currentEvent = action.payload;
+//         state.loading = false;
+//         state.error = null;
 //       })
 //       .addCase(fetchEventById.rejected, (state, action) => {
 //         state.loading = false;
 //         state.error = action.payload;
 //       })
-//       // Handle createEvent
-//       .addCase(createEvent.pending, (state) => {
+//       // Handle fetchEventDetails
+//       .addCase(fetchEventDetails.pending, (state) => {
 //         state.loading = true;
+//       })
+//       .addCase(fetchEventDetails.fulfilled, (state, action) => {
+//         state.currentEvent = action.payload;
+//         state.loading = false;
 //         state.error = null;
 //       })
-//       .addCase(createEvent.fulfilled, (state, action) => {
+//       .addCase(fetchEventDetails.rejected, (state, action) => {
 //         state.loading = false;
+//         state.error = action.payload;
+//       })
+//       // Handle other actions...
+//       .addCase(createEvent.pending, (state) => {
+//         state.loading = true;
+//       })
+//       .addCase(createEvent.fulfilled, (state, action) => {
 //         state.events.push(action.payload);
-//         state.currentEvent = action.payload;
+//         state.loading = false;
+//         state.error = null;
 //       })
 //       .addCase(createEvent.rejected, (state, action) => {
 //         state.loading = false;
 //         state.error = action.payload;
 //       })
-//       // Handle updateEvent
 //       .addCase(updateEvent.pending, (state) => {
 //         state.loading = true;
-//         state.error = null;
 //       })
 //       .addCase(updateEvent.fulfilled, (state, action) => {
-//         state.loading = false;
-//         state.events = state.events.map(event => 
-//           event.event_id === action.payload.event_id ? action.payload : event
-//         );
+//         const index = state.events.findIndex(event => event.id === action.payload.id);
+//         if (index !== -1) {
+//           state.events[index] = action.payload;
+//         }
 //         state.currentEvent = action.payload;
+//         state.loading = false;
+//         state.error = null;
 //       })
 //       .addCase(updateEvent.rejected, (state, action) => {
 //         state.loading = false;
@@ -170,18 +155,19 @@
 // export const { clearCurrentEvent } = eventSlice.actions;
 // export default eventSlice.reducer;
 
+// src/store/slices/eventSlice.js
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { nodeApi } from '../../services/api';
+import { springApi } from '../../services/api'; // Using Spring Boot API client
 
 // Async thunks
 export const fetchEvents = createAsyncThunk(
   'events/fetchEvents',
   async (filters, { rejectWithValue }) => {
     try {
-      const response = await nodeApi.get('/events', { params: filters });
+      const response = await springApi.get('/events', { params: filters });
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data || 'Failed to fetch events');
+      return rejectWithValue(error.response?.data?.message || 'Failed to fetch events');
     }
   }
 );
@@ -190,23 +176,22 @@ export const fetchEventById = createAsyncThunk(
   'events/fetchEventById',
   async (id, { rejectWithValue }) => {
     try {
-      const response = await nodeApi.get(`/events/${id}`);
+      const response = await springApi.get(`/events/${id}`);
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data || 'Failed to fetch event');
+      return rejectWithValue(error.response?.data?.message || 'Failed to fetch event');
     }
   }
 );
 
-// Add the missing fetchEventDetails function
 export const fetchEventDetails = createAsyncThunk(
   'events/fetchEventDetails',
   async (id, { rejectWithValue }) => {
     try {
-      const response = await nodeApi.get(`/events/${id}/details`);
+      const response = await springApi.get(`/events/${id}/details`);
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data || 'Failed to fetch event details');
+      return rejectWithValue(error.response?.data?.message || 'Failed to fetch event details');
     }
   }
 );
@@ -215,10 +200,10 @@ export const createEvent = createAsyncThunk(
   'events/createEvent',
   async (eventData, { rejectWithValue }) => {
     try {
-      const response = await nodeApi.post('/events', eventData);
+      const response = await springApi.post('/events', eventData);
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data || 'Failed to create event');
+      return rejectWithValue(error.response?.data?.message || 'Failed to create event');
     }
   }
 );
@@ -227,10 +212,10 @@ export const updateEvent = createAsyncThunk(
   'events/updateEvent',
   async ({ id, eventData }, { rejectWithValue }) => {
     try {
-      const response = await nodeApi.put(`/events/${id}`, eventData);
+      const response = await springApi.put(`/events/${id}`, eventData);
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data || 'Failed to update event');
+      return rejectWithValue(error.response?.data?.message || 'Failed to update event');
     }
   }
 );
@@ -242,7 +227,7 @@ const eventSlice = createSlice({
     events: [],
     currentEvent: null,
     loading: false,
-    error: null,
+    error: null
   },
   reducers: {
     clearCurrentEvent: (state) => {
@@ -251,7 +236,6 @@ const eventSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // Handle fetchEvents
       .addCase(fetchEvents.pending, (state) => {
         state.loading = true;
       })
@@ -264,7 +248,6 @@ const eventSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      // Handle fetchEventById
       .addCase(fetchEventById.pending, (state) => {
         state.loading = true;
       })
@@ -277,7 +260,6 @@ const eventSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      // Handle fetchEventDetails
       .addCase(fetchEventDetails.pending, (state) => {
         state.loading = true;
       })
@@ -290,7 +272,6 @@ const eventSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      // Handle other actions...
       .addCase(createEvent.pending, (state) => {
         state.loading = true;
       })
