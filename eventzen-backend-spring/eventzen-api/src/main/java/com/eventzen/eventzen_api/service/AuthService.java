@@ -28,21 +28,46 @@ public class AuthService {
     @Autowired
     private UserService userService;
 
-    public AuthResponse login(AuthRequest loginRequest) {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        loginRequest.getEmail(),
-                        loginRequest.getPassword()
-                )
-        );
+    // public AuthResponse login(AuthRequest loginRequest) {
+    //     Authentication authentication = authenticationManager.authenticate(
+    //             new UsernamePasswordAuthenticationToken(
+    //                     loginRequest.getEmail(),
+    //                     loginRequest.getPassword()
+    //             )
+    //     );
 
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        String jwt = tokenProvider.generateToken(authentication);
+    //     SecurityContextHolder.getContext().setAuthentication(authentication);
+    //     String jwt = tokenProvider.generateToken(authentication);
         
-        UserDto user = userService.getUserByEmail(loginRequest.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+    //     UserDto user = userService.getUserByEmail(loginRequest.getEmail())
+    //             .orElseThrow(() -> new RuntimeException("User not found"));
         
-        return new AuthResponse(jwt, user);
+    //     return new AuthResponse(jwt, user);
+    // }
+    public AuthResponse login(AuthRequest loginRequest) {
+        try {
+            System.out.println("Login attempt for: " + loginRequest.getEmail());
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            loginRequest.getEmail(),
+                            loginRequest.getPassword()
+                    )
+            );
+            System.out.println("Authentication successful");
+    
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            String jwt = tokenProvider.generateToken(authentication);
+            System.out.println("JWT token generated");
+            
+            UserDto user = userService.getUserByEmail(loginRequest.getEmail())
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+            
+            return new AuthResponse(jwt, user);
+        } catch (Exception e) {
+            System.out.println("Login error: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
     }
 
     public UserDto register(RegisterRequest signUpRequest) {

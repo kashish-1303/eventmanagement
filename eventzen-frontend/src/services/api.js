@@ -56,7 +56,7 @@ import axios from 'axios';
 
 // Node.js backend API client
 export const nodeApi = axios.create({
-  baseURL: process.env.REACT_APP_NODE_API_URL || 'http://localhost:5000/api',
+  baseURL: process.env.REACT_APP_NODE_API_URL || 'http://localhost:3001/api',
   headers: {
     'Content-Type': 'application/json'
   }
