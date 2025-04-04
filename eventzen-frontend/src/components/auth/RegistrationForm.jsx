@@ -177,7 +177,9 @@ const RegisterForm = () => {
     
     if (validateForm()) {
       try {
-        const { confirmPassword, ...registerData } = formData;
+        const { confirmPassword, name, ...rest } = formData;
+        // Map 'name' to 'username'
+        const registerData = { username: name, ...rest };
         await dispatch(register(registerData)).unwrap();
         navigate('/login', { state: { message: 'Registration successful! Please log in.' } });
       } catch (err) {
@@ -185,6 +187,7 @@ const RegisterForm = () => {
       }
     }
   };
+  
 
   return (
     <div className="card">
