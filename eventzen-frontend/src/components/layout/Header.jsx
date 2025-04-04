@@ -1,4 +1,4 @@
-// // src/components/layout/Header.jsx
+
 // import { Link } from 'react-router-dom';
 // import { useSelector, useDispatch } from 'react-redux';
 // import { logout } from '../../store/slices/authSlice';
@@ -6,27 +6,48 @@
 // const Header = () => {
 //   const { user, isAuthenticated } = useSelector(state => state.auth);
 //   const dispatch = useDispatch();
-  
+
 //   const handleLogout = () => {
 //     dispatch(logout());
 //   };
-  
+
 //   return (
-//     <header className="bg-white shadow-md">
+//     <header className="bg-white shadow-md fixed top-0 left-0 right-0 z-20">
 //       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-//         <Link to="/" className="text-2xl font-bold text-blue-600">EventZen</Link>
-        
-//         <nav className="hidden md:flex space-x-6">
-//           <Link to="/events" className="text-gray-700 hover:text-blue-600">Events</Link>
-//           <Link to="/venues" className="text-gray-700 hover:text-blue-600">Venues</Link>
+//         {/* Logo */}
+//         <div className="flex items-center">
+//           <Link to="/" className="text-2xl font-bold text-blue-600">
+//             EventZen
+//           </Link>
+//         </div>
+//         {/* Navigation Links */}
+//         <nav className="flex space-x-6">
+//           <Link to="/events" className="text-gray-700 hover:text-blue-600">
+//             Events
+//           </Link>
+//           <Link to="/venues" className="text-gray-700 hover:text-blue-600">
+//             Venues
+//           </Link>
 //           {isAuthenticated && (
-//             <Link to="/bookings" className="text-gray-700 hover:text-blue-600">My Bookings</Link>
+//             <>
+//               <Link to="/bookings" className="text-gray-700 hover:text-blue-600">
+//                 My Bookings
+//               </Link>
+//               <Link to="/profile" className="text-gray-700 hover:text-blue-600">
+//                 Profile
+//               </Link>
+//             </>
+//           )}
+//           {isAuthenticated && user && user.role === 'ADMIN' && (
+//             <Link to="/admin/dashboard" className="text-gray-700 hover:text-blue-600">
+//               Admin
+//             </Link>
 //           )}
 //         </nav>
-        
+//         {/* Authentication Controls */}
 //         <div className="flex items-center space-x-4">
 //           {isAuthenticated ? (
-//             <div className="flex items-center space-x-4">
+//             <>
 //               <span className="text-gray-700">Welcome, {user.username}</span>
 //               <button
 //                 onClick={handleLogout}
@@ -34,9 +55,9 @@
 //               >
 //                 Logout
 //               </button>
-//             </div>
+//             </>
 //           ) : (
-//             <div className="flex space-x-2">
+//             <>
 //               <Link
 //                 to="/login"
 //                 className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded"
@@ -49,7 +70,7 @@
 //               >
 //                 Register
 //               </Link>
-//             </div>
+//             </>
 //           )}
 //         </div>
 //       </div>
@@ -57,45 +78,76 @@
 //   );
 // };
 
-
 // export default Header;
-
 // src/components/layout/Header.jsx
 import { Link } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../../store/slices/authSlice';
 
-const Header = () => {
-  const { user, isAuthenticated } = useSelector(state => state.auth);
+const Header = ({ onToggleSidebar }) => {
+  const { user, isAuthenticated } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
-  
+
   const handleLogout = () => {
     dispatch(logout());
   };
-  
+
   return (
-    <header className="bg-white shadow-md z-10 relative">
+    <header className="bg-white shadow-md fixed top-0 left-0 right-0 z-50">
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-        <Link to="/" className="text-2xl font-bold text-blue-600">EventZen</Link>
-        
-        <nav className="hidden md:flex space-x-6">
-          <Link to="/events" className="text-gray-700 hover:text-blue-600">Events</Link>
-          <Link to="/venues" className="text-gray-700 hover:text-blue-600">Venues</Link>
+        {/* Logo & Hamburger */}
+        <div className="flex items-center space-x-4">
+          <button
+            onClick={onToggleSidebar}
+            className="text-gray-600 hover:text-gray-800 focus:outline-none"
+            aria-label="Toggle sidebar"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
+                d="M4 6h16M4 12h16M4 18h16" 
+              />
+            </svg>
+          </button>
+          <Link to="/" className="text-2xl font-bold text-blue-600">
+            EventZen
+          </Link>
+        </div>
+
+        {/* Navigation Links */}
+        <nav className="flex space-x-6">
+          <Link to="/events" className="text-gray-700 hover:text-blue-600">
+            Events
+          </Link>
+          <Link to="/venues" className="text-gray-700 hover:text-blue-600">
+            Venues
+          </Link>
           {isAuthenticated && (
             <>
-              {/* If you have a Bookings page */}
-              <Link to="/bookings" className="text-gray-700 hover:text-blue-600">My Bookings</Link>
-              <Link to="/profile" className="text-gray-700 hover:text-blue-600">Profile</Link>
+              <Link to="/bookings" className="text-gray-700 hover:text-blue-600">
+                My Bookings
+              </Link>
+              <Link to="/profile" className="text-gray-700 hover:text-blue-600">
+                Profile
+              </Link>
             </>
           )}
-          {isAuthenticated && user && user.role === 'ADMIN' && (
-            <Link to="/admin/dashboard" className="text-gray-700 hover:text-blue-600">Admin</Link>
+          {isAuthenticated && user?.role === 'ADMIN' && (
+            <Link to="/admin/dashboard" className="text-gray-700 hover:text-blue-600">
+              Admin
+            </Link>
           )}
         </nav>
-        
+
+        {/* Authentication Controls */}
         <div className="flex items-center space-x-4">
           {isAuthenticated ? (
-            <div className="flex items-center space-x-4">
+            <>
               <span className="text-gray-700">Welcome, {user.username}</span>
               <button
                 onClick={handleLogout}
@@ -103,9 +155,9 @@ const Header = () => {
               >
                 Logout
               </button>
-            </div>
+            </>
           ) : (
-            <div className="flex space-x-2">
+            <>
               <Link
                 to="/login"
                 className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded"
@@ -118,7 +170,7 @@ const Header = () => {
               >
                 Register
               </Link>
-            </div>
+            </>
           )}
         </div>
       </div>
