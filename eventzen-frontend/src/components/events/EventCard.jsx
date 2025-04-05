@@ -49,6 +49,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { formatDate } from '../../utils/formatters';
+import { getEventImageByCategory } from '../../utils/imageUtils';
 
 const EventCard = ({ event }) => {
   const navigate = useNavigate();
@@ -58,21 +59,20 @@ const EventCard = ({ event }) => {
     console.log("Navigating to event with ID:", event.id);
     navigate(`/events/${event.id}`);
   };
-
+  // Get image based on category
+  const imageUrl = event.image_url || getEventImageByCategory(event.category);
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
       <div className="h-48 bg-gray-300 relative">
-        {event.image_url ? (
-          <img 
-            src={event.image_url} 
-            alt={event.title}
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gray-200">
-            <span className="text-gray-500">No Image</span>
-          </div>
-        )}
+      <img 
+          src={imageUrl} 
+          alt={event.title}
+          className="w-full h-full object-cover"
+          onError={(e) => {
+            e.target.onerror = null;
+            e.target.src = '/images/default.jpg';
+          }}
+        />
         <div className="absolute top-2 right-2 bg-blue-500 text-white px-2 py-1 rounded-full text-xs">
           {event.category}
         </div>
