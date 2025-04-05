@@ -14,12 +14,13 @@ export const formatCurrency = (amount, currency = 'USD') => {
   
   // Format time from 24h to 12h format
   export const formatTime = (timeString) => {
-    const date = new Date(`2000-01-01T${timeString}`);
+    const date = new Date(timeString);
     return date.toLocaleTimeString('en-US', {
       hour: '2-digit',
       minute: '2-digit',
     });
   };
+  
   
   // Format datetime
   export const formatDateTime = (dateTimeString) => {
