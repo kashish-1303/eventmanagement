@@ -19,7 +19,7 @@ const EventDetails = () => {
   
   const { currentEvent, loading, error } = useSelector(state => state.events);
   const { isAuthenticated } = useSelector(state => state.auth);
-  
+  console.log("EventDetails received currentEvent:", currentEvent);
   useEffect(() => {
     console.log("Event ID from params:", eventId);
      // Debug
