@@ -19,36 +19,29 @@ const Booking = () => {
   const [venueError, setVenueError] = useState(null);
   
   useEffect(() => {
+    console.log("Event data:", event);
+  console.log("Event ID from params:", eventId);
     if (!isAuthenticated) {
       navigate('/login', { state: { from: `/booking/${eventId}` } });
       return;
     }
     
     // Fetch event details if needed
-    if (!event || event.event_id !== eventId) {
+    if (!event || event.id !== eventId) {
+      console.log("Dispatching fetchEventDetails");
       dispatch(fetchEventDetails(eventId));
     }
   }, [dispatch, eventId, isAuthenticated, navigate, event]);
   
+  
   useEffect(() => {
-    if (event && event.venue_id) {
-      const fetchVenueDetails = async () => {
-        try {
-          setVenueLoading(true);
-          const response = await api.get(`/venues/${event.venue_id}`);
-          setVenueDetails(response.data);
-        } catch (err) {
-          setVenueError('Failed to load venue details. Please try again.');
-          console.error(err);
-        } finally {
-          setVenueLoading(false);
-        }
-      };
-      
-      fetchVenueDetails();
+    // The venue is already included in the event object
+    if (event && event.venue) {
+      // Just set the venue details directly from the event object
+      setVenueDetails(event.venue);
+      // No need to fetch separately
     }
   }, [event]);
-  
   if (eventLoading || venueLoading) {
     return (
       <div className="container mx-auto p-6">
@@ -86,16 +79,16 @@ const Booking = () => {
           <div className="p-6">
             <h1 className="text-2xl font-bold mb-2">{event.title}</h1>
             <p className="text-gray-600 mb-4">
-              {new Date(event.start_time).toLocaleDateString()} at {new Date(event.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              {new Date(event.startTime).toLocaleDateString()} at {new Date(event.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             </p>
             
             {venueDetails && (
-              <div className="mb-6 p-4 bg-gray-50 rounded">
-                <h2 className="text-lg font-semibold mb-2">Venue: {venueDetails.name}</h2>
-                <p>Capacity: {venueDetails.capacity} people</p>
-                <p>Price: ${venueDetails.price_per_hour}/hour</p>
-              </div>
-            )}
+  <div className="mb-6 p-4 bg-gray-50 rounded">
+    <h2 className="text-lg font-semibold mb-2">Venue: {venueDetails.name}</h2>
+    <p>Capacity: {venueDetails.capacity} people</p>
+    <p>Price: ${venueDetails.pricePerHour}/hour</p>
+  </div>
+)}
             
             <div className="border-t border-gray-200 pt-6">
               <h2 className="text-xl font-semibold mb-4">Book Your Spot</h2>

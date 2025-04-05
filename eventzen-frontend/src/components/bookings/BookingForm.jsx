@@ -49,7 +49,7 @@ const BookingForm = ({ event }) => {
       // Add attendees
       const attendeePromises = attendees.map(attendee => 
         AttendeeService.addAttendee({
-          booking_id: booking.booking_id,
+          booking_id: booking.id,
           name: attendee.name,
           email: attendee.email
         })
