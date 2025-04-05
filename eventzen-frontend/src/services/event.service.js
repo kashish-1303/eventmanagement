@@ -6,10 +6,12 @@ const EventService = {
     return await springApi.get('/events', { params });
   },
   
-  getEventById: async (id) => {
-    console.log("Fetching event with ID from service:", id);
-    return await springApi.get(`/events/${id}`);
-  },
+  getEventById: async (id) => {try {
+    const response = await api.get(`/events/${eventId}`);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Failed to fetch event details');
+  }},
   
   createEvent: async (eventData) => {
     return await springApi.post('/events', eventData);

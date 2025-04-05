@@ -1,11 +1,12 @@
-// src/pages/Payment.jsx
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useParams, useNavigate } from 'react-router-dom';
 import PaymentForm from '../components/payment/PaymentForm';
 import { Button } from '../components/common';
-// import { getBookingDetails } from '../services/booking.service';
 import { getBookingById } from '../services/booking.service';
+// Add this import:
+import { getEventById } from '../services/event.service'; // You'll need to create this service function
+
 const Payment = () => {
   const { bookingId } = useParams();
   const navigate = useNavigate();
@@ -13,24 +14,39 @@ const Payment = () => {
   const { user } = useSelector((state) => state.auth);
   
   const [booking, setBooking] = useState(null);
+  const [event, setEvent] = useState(null); // Store event data separately
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  console.log('Full auth state:', useSelector((state) => state.auth));
+  
   useEffect(() => {
     const fetchBookingDetails = async () => {
       try {
         setLoading(true);
-        const data = await getBookingById(bookingId);
-        console.log('Booking user_id:', data.user_id);
-console.log('Current user_id:', user?.user_id);
+        const bookingData = await getBookingById(bookingId);
+        console.log('Full booking data:', bookingData);
+        
         // Check if booking belongs to current user
-        if (data.user_id !== user?.user_id) {
+        if (bookingData.user_id !== user?.id) {
           setError('Unauthorized access to this booking');
           return;
         }
         
-        setBooking(data);
+        setBooking(bookingData);
+        
+        // Fetch event data separately
+        if (bookingData.event_id) {
+          try {
+            const eventData = await getEventById(bookingData.event_id);
+            setEvent(eventData);
+          } catch (eventErr) {
+            console.error('Error fetching event:', eventErr);
+            setError('Failed to fetch event details');
+          }
+        } else {
+          setError('Booking does not have associated event information');
+        }
       } catch (err) {
+        console.error('Error fetching booking:', err);
         setError(err.message || 'Failed to fetch booking details');
       } finally {
         setLoading(false);
@@ -97,20 +113,21 @@ console.log('Current user_id:', user?.user_id);
         <div className="mb-8 p-4 bg-gray-50 rounded-lg">
           <h2 className="text-xl font-semibold mb-4">Booking Summary</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <p className="text-gray-600">Event:</p>
-              <p className="font-medium">{booking.event.title}</p>
-            </div>
-            <div>
-              <p className="text-gray-600">Date:</p>
-              <p className="font-medium">
-                {new Date(booking.event.start_time).toLocaleDateString()}
-              </p>
-            </div>
-            <div>
-              <p className="text-gray-600">Venue:</p>
-              <p className="font-medium">{booking.event.venue.name}</p>
-            </div>
+          // In your JSX where you display event details
+<div>
+  <p className="text-gray-600">Event:</p>
+  <p className="font-medium">{event?.title || 'Event information unavailable'}</p>
+</div>
+<div>
+  <p className="text-gray-600">Date:</p>
+  <p className="font-medium">
+    {event?.start_time ? new Date(event.startTime).toLocaleDateString() : 'Date unavailable'}
+  </p>
+</div>
+<div>
+  <p className="text-gray-600">Venue:</p>
+  <p className="font-medium">{event?.venue?.name || 'Venue information unavailable'}</p>
+</div>
             <div>
               <p className="text-gray-600">Status:</p>
               <p className="font-medium">{booking.status}</p>
