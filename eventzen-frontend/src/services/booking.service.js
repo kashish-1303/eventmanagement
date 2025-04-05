@@ -8,44 +8,91 @@
 //     status: 'PENDING',
 //     payment_status: 'UNPAID'
 //   };
-//   const response = await nodeApi.post('/bookings', bookingWithStatus);
-//   return response.data;
+//   try {
+//     const response = await nodeApi.post('/bookings', bookingWithStatus);
+//     return response.data;
+//   } catch (error) {
+//     console.error("Error creating booking:", error);
+//     throw error;
+//   }
 // };
 
-// // Add a function to update payment status
+// // Add a function to update payment status - with error handling
 // const updateBookingPayment = async (bookingId, paymentData) => {
-//   const response = await nodeApi.post(`/bookings/${bookingId}/payment`, paymentData);
-//   return response.data;
+//   try {
+//     // Check if the endpoint exists, if not, use a different approach
+//     const response = await nodeApi.put(`/bookings/${bookingId}`, {
+//       status: 'CONFIRMED',
+//       payment_status: 'PAID',
+//       payment_details: paymentData
+//     });
+//     return response.data;
+//   } catch (error) {
+//     console.error("Error updating booking payment:", error);
+//     throw error;
+//   }
 // };
 
 // const getBookings = async (filters) => {
-//   const response = await nodeApi.get('/bookings', { params: filters });
-//   return response.data;
-// };
-
-// const getBookingById = async (id) => {
-//   const response = await nodeApi.get(`/bookings/${id}`);
-//   return response.data;
-// };
-
-// const updateBooking = async (id, updateData) => {
-//   const response = await nodeApi.put(`/bookings/${id}`, updateData);
-//   return response.data;
-// };
-
-// const cancelBooking = async (id) => {
-//   const response = await nodeApi.delete(`/bookings/${id}`);
-//   return response.data;
+//   try {
+//     const response = await nodeApi.get('/bookings', { params: filters });
+//     return response.data;
+//   } catch (error) {
+//     console.error("Error getting bookings:", error);
+//     throw error;
+//   }
 // };
 
 // const getUserBookings = async (userId) => {
-//   const response = await nodeApi.get(`/users/${userId}/bookings`);
-//   return response.data;
+//   try {
+//     const response = await nodeApi.get(`/users/${userId}/bookings`);
+//     return response.data;
+//   } catch (error) {
+//     console.error("Error getting user bookings:", error);
+//     // Return empty array instead of throwing error
+//     return { data: [] };
+//   }
+// };
+
+// // Rest of your existing functions with added error handling
+// const getBookingById = async (id) => {
+//   try {
+//     const response = await nodeApi.get(`/bookings/${id}`);
+//     return response.data;
+//   } catch (error) {
+//     console.error("Error getting booking by ID:", error);
+//     throw error;
+//   }
+// };
+
+// const updateBooking = async (id, updateData) => {
+//   try {
+//     const response = await nodeApi.put(`/bookings/${id}`, updateData);
+//     return response.data;
+//   } catch (error) {
+//     console.error("Error updating booking:", error);
+//     throw error;
+//   }
+// };
+
+// const cancelBooking = async (id) => {
+//   try {
+//     const response = await nodeApi.delete(`/bookings/${id}`);
+//     return response.data;
+//   } catch (error) {
+//     console.error("Error canceling booking:", error);
+//     throw error;
+//   }
 // };
 
 // const getBookingDetails = async (bookingId) => {
-//   const response = await nodeApi.get(`/bookings/${bookingId}/details`);
-//   return response.data;
+//   try {
+//     const response = await nodeApi.get(`/bookings/${bookingId}/details`);
+//     return response.data;
+//   } catch (error) {
+//     console.error("Error getting booking details:", error);
+//     throw error;
+//   }
 // };
 
 // export {
@@ -89,11 +136,10 @@ const createBooking = async (bookingData) => {
   }
 };
 
-// Add a function to update payment status - with error handling
+// Update to match your backend route (PATCH instead of PUT)
 const updateBookingPayment = async (bookingId, paymentData) => {
   try {
-    // Check if the endpoint exists, if not, use a different approach
-    const response = await nodeApi.put(`/bookings/${bookingId}`, {
+    const response = await nodeApi.patch(`/bookings/${bookingId}/status`, {
       status: 'CONFIRMED',
       payment_status: 'PAID',
       payment_details: paymentData
@@ -115,9 +161,10 @@ const getBookings = async (filters) => {
   }
 };
 
+// Fixed to match your backend route pattern exactly
 const getUserBookings = async (userId) => {
   try {
-    const response = await nodeApi.get(`/users/${userId}/bookings`);
+    const response = await nodeApi.get(`/bookings/user/${userId}`);
     return response.data;
   } catch (error) {
     console.error("Error getting user bookings:", error);
@@ -126,7 +173,6 @@ const getUserBookings = async (userId) => {
   }
 };
 
-// Rest of your existing functions with added error handling
 const getBookingById = async (id) => {
   try {
     const response = await nodeApi.get(`/bookings/${id}`);
@@ -137,9 +183,11 @@ const getBookingById = async (id) => {
   }
 };
 
+// This might not exist in your backend - you might need to use PATCH instead
 const updateBooking = async (id, updateData) => {
   try {
-    const response = await nodeApi.put(`/bookings/${id}`, updateData);
+    // Using PATCH for consistency with your other endpoints
+    const response = await nodeApi.patch(`/bookings/${id}/status`, updateData);
     return response.data;
   } catch (error) {
     console.error("Error updating booking:", error);
@@ -157,9 +205,10 @@ const cancelBooking = async (id) => {
   }
 };
 
+// This endpoint might not exist in your backend
 const getBookingDetails = async (bookingId) => {
   try {
-    const response = await nodeApi.get(`/bookings/${bookingId}/details`);
+    const response = await nodeApi.get(`/bookings/${bookingId}`);
     return response.data;
   } catch (error) {
     console.error("Error getting booking details:", error);
