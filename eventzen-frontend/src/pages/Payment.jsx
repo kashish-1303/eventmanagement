@@ -4,8 +4,8 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useParams, useNavigate } from 'react-router-dom';
 import PaymentForm from '../components/payment/PaymentForm';
 import { Button } from '../components/common';
-import { getBookingDetails } from '../services/booking.service';
-
+// import { getBookingDetails } from '../services/booking.service';
+import { getBookingById } from '../services/booking.service';
 const Payment = () => {
   const { bookingId } = useParams();
   const navigate = useNavigate();
@@ -15,18 +15,23 @@ const Payment = () => {
   const [booking, setBooking] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
+  console.log('Full auth state:', useSelector((state) => state.auth));
   useEffect(() => {
     const fetchBookingDetails = async () => {
       try {
         setLoading(true);
-        const data = await getBookingDetails(bookingId);
-        
-        // Check if booking belongs to current user
-        if (data.user_id !== user?.user_id) {
-          setError('Unauthorized access to this booking');
-          return;
-        }
+        const data = await getBookingById(bookingId);
+       // First, log the full user object to see its structure
+console.log('Full user object:', user);
+
+// Then use a more flexible approach to check authorization
+let userIdentifier = user?.user_id || user?.id || user?.userId;
+console.log('Using user identifier:', userIdentifier);
+
+if (data.user_id && userIdentifier && data.user_id !== userIdentifier) {
+  setError('Unauthorized access to this booking');
+  return;
+}
         
         setBooking(data);
       } catch (err) {
