@@ -16,14 +16,33 @@ export const fetchEvents = createAsyncThunk(
   }
 );
 
+// export const fetchEventById = createAsyncThunk(
+//   'events/fetchEventById',
+//   async (id, { rejectWithValue }) => {
+//     try {
+//       const response = await springApi.get(`/events/${id}`);
+//       return response.data;
+//     } catch (error) {
+//       return rejectWithValue(error.response?.data?.message || 'Failed to fetch event');
+//     }
+//   }
+// );
+
 export const fetchEventById = createAsyncThunk(
   'events/fetchEventById',
   async (id, { rejectWithValue }) => {
     try {
+      console.log("Fetching event with ID:", id);
       const response = await springApi.get(`/events/${id}`);
+      console.log("API Response for event:", response.data);
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to fetch event');
+      console.error("Error fetching event:", error);
+      // Extract more detailed error information
+      const errorMessage = error.response?.data?.message || 
+                          error.message || 
+                          'Failed to fetch event';
+      return rejectWithValue(errorMessage);
     }
   }
 );
@@ -107,8 +126,10 @@ const eventSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchEventById.rejected, (state, action) => {
+        console.error("fetchEventById rejected with error:", action.payload);
         state.loading = false;
         state.error = action.payload;
+        state.currentEvent = null; // Reset current event on error
       })
       .addCase(fetchEventDetails.pending, (state) => {
         state.loading = true;
