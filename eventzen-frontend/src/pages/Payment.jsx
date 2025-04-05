@@ -270,7 +270,8 @@ const Payment = () => {
   }
 
   // Calculate the amount due - use a default of 0 if not present
-  const amountDue = booking.total_amount || 0;
+  // In Payment.jsx, where you calculate amountDue:
+const amountDue = booking.total_amount || 99.99;
   
   // Format event date correctly
   const formatEventDate = () => {
