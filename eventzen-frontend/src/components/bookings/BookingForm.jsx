@@ -43,28 +43,56 @@ const BookingForm = ({ event }) => {
         event_id: event.id
       };
       
+      console.log("Creating booking with data:", bookingData);
       const bookingResponse = await BookingService.createBooking(bookingData);
-      const booking = bookingResponse.data;
+      
+      // Debug the actual response structure
+      console.log("Full booking response:", bookingResponse);
+      
+      // The response might be structured differently than expected
+      // It might be bookingResponse.data.booking or just bookingResponse.data
+      const booking = bookingResponse.data || bookingResponse;
+      
+      if (!booking || (!booking.id && !booking.booking_id)) {
+        console.error("Invalid booking response structure:", booking);
+        throw new Error("Received invalid booking data from server");
+      }
+      
+      console.log("Booking object to use:", booking);
       
       // Add attendees
-      const attendeePromises = attendees.map(attendee => 
-        AttendeeService.addAttendee({
-          booking_id: booking.id,
-          name: attendee.name,
-          email: attendee.email
-        })
-      );
+      const bookingId = booking.booking_id || booking.id;
       
-      await Promise.all(attendeePromises);
-      
-      dispatch(createBookingSuccess(booking));
-      navigate(`/payment/${booking.booking_id}`);
+      try {
+        // Add attendees
+        const attendeePromises = attendees.map(attendee => {
+          const attendeeData = {
+            booking_id: bookingId,
+            name: attendee.name,
+            email: attendee.email
+          };
+          console.log("Adding attendee:", attendeeData);
+          return AttendeeService.addAttendee(attendeeData);
+        });
+        
+        await Promise.all(attendeePromises);
+        console.log("All attendees added successfully");
+        
+        dispatch(createBookingSuccess(booking));
+        navigate(`/payment/${bookingId}`);
+      } catch (attendeeError) {
+        console.error("Error adding attendees:", attendeeError);
+        setError("Booking created but failed to add attendees");
+      }
     } catch (error) {
+      console.error("Error creating booking:", error);
+      console.error("Response data:", error.response?.data);
       setError(error.response?.data?.message || 'Failed to create booking');
     } finally {
       setIsSubmitting(false);
     }
   };
+  
   
   return (
     <div className="max-w-2xl mx-auto bg-white p-6 rounded-lg shadow-md">
@@ -137,7 +165,7 @@ const BookingForm = ({ event }) => {
         <div className="mt-8 flex justify-end">
           <button
             type="button"
-            onClick={() => navigate(`/events/${event.event_id}`)}
+            onClick={() => navigate(`/events/${event.id}`)}
             className="mr-4 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded"
           >
             Cancel
