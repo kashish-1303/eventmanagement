@@ -58,7 +58,7 @@ const BookingForm = ({ event }) => {
       await Promise.all(attendeePromises);
       
       dispatch(createBookingSuccess(booking));
-      navigate(`/bookings/${booking.booking_id}/payment`);
+      navigate(`/payment/${booking.booking_id}`);
     } catch (error) {
       setError(error.response?.data?.message || 'Failed to create booking');
     } finally {
