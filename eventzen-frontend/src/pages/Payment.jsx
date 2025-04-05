@@ -21,17 +21,13 @@ const Payment = () => {
       try {
         setLoading(true);
         const data = await getBookingById(bookingId);
-       // First, log the full user object to see its structure
-console.log('Full user object:', user);
-
-// Then use a more flexible approach to check authorization
-let userIdentifier = user?.user_id || user?.id || user?.userId;
-console.log('Using user identifier:', userIdentifier);
-
-if (data.user_id && userIdentifier && data.user_id !== userIdentifier) {
-  setError('Unauthorized access to this booking');
-  return;
-}
+        console.log('Booking user_id:', data.user_id);
+console.log('Current user_id:', user?.user_id);
+        // Check if booking belongs to current user
+        if (data.user_id !== user?.user_id) {
+          setError('Unauthorized access to this booking');
+          return;
+        }
         
         setBooking(data);
       } catch (err) {
