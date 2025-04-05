@@ -1,0 +1,93 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: eventzen-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: eventzen
+      MYSQL_USER: eventzenuser
+      MYSQL_PASSWORD: password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - eventzen-network
+
+  mongodb:
+    image: mongo:6.0
+    container_name: eventzen-mongodb
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_DATABASE: eventzen
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - eventzen-network
+
+  eventzen-spring:
+    build:
+      context: ./eventzen-backend-spring
+      dockerfile: Dockerfile
+    container_name: eventzen-spring
+    restart: always
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/eventzen
+      SPRING_DATASOURCE_USERNAME: eventzenuser
+      SPRING_DATASOURCE_PASSWORD: password
+      JWT_SECRET: yourjwtsecretkey
+      JWT_EXPIRATION: 86400000
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql
+    networks:
+      - eventzen-network
+
+  eventzen-node:
+    build:
+      context: ./eventzen-backend-node
+      dockerfile: Dockerfile
+    container_name: eventzen-node
+    restart: always
+    environment:
+      MONGODB_URI: mongodb://admin:password@mongodb:27017/eventzen
+      PORT: 3000
+      JWT_SECRET: yourjwtsecretkey
+      EVENT_SERVICE_URL: http://eventzen-spring:8080
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mongodb
+      - eventzen-spring
+    networks:
+      - eventzen-network
+
+  eventzen-frontend:
+    build:
+      context: ./eventzen-frontend
+      dockerfile: Dockerfile
+    container_name: eventzen-frontend
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - eventzen-spring
+      - eventzen-node
+    networks:
+      - eventzen-network
+
+networks:
+  eventzen-network:
+    driver: bridge
+
+volumes:
+  mysql_data:
+  mongodb_data:
