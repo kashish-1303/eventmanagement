@@ -21,7 +21,7 @@ import Payment from './pages/Payment';
 import Confirmation from './pages/Confirmation';
 import NotFound from './pages/NotFound';
 import Profile from './pages/Profile';
-
+import BookingDetail from './pages/BookingDetails';
 // Import admin pages
 import Dashboard from './pages/Admin/Dashboard';
 import ManageEvents from './pages/Admin/ManageEvents';
