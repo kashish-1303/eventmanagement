@@ -11,7 +11,14 @@ const EventDetail = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   
-  const { event, loading, error } = useSelector(state => state.events);
+  // const { event, loading, error } = useSelector(state => state.events);
+  const { currentEvent: event, loading, error } = useSelector(state => state.events);
+  useEffect(() => {
+    // Only dispatch if the event isn't already loaded
+    if (!event || event.id !== eventId) {
+      dispatch(fetchEventDetails(eventId));
+    }
+  }, [dispatch, eventId, event]);
   const { isAuthenticated } = useSelector(state => state.auth);
   
   useEffect(() => {
@@ -54,6 +61,9 @@ const EventDetail = () => {
         </div>
       </div>
     );
+  }
+  else {
+    console.log("Event object:", event);
   }
   
   // Check if event is still available for booking
