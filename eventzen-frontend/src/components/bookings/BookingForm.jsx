@@ -40,7 +40,7 @@ const BookingForm = ({ event }) => {
       // Create booking
       const bookingData = {
         user_id: user.id,
-        event_id: event.event_id
+        event_id: event.id
       };
       
       const bookingResponse = await BookingService.createBooking(bookingData);
