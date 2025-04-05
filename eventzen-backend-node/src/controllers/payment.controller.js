@@ -2,7 +2,10 @@
 const Payment = require('../models/payment.model');
 const Booking = require('../models/booking.model');
 const { v4: uuidv4 } = require('uuid');
+const axios = require('axios'); // Make sure axios is imported at the top
 
+// Use environment variable from .env
+const SPRING_BOOT_API_URL = process.env.SPRING_BOOT_API_URL || 'http://localhost:8080';
 exports.createPayment = async (req, res) => {
   try {
     const { booking_id, amount, currency, method } = req.body;
@@ -33,6 +36,9 @@ exports.createPayment = async (req, res) => {
   }
 };
 // Modified section of updatePaymentStatus in payment.controller.js
+// In eventzen-backend-node/src/controllers/payment.controller.js
+
+
 exports.updatePaymentStatus = async (req, res) => {
   try {
     console.log('⭐️ Payment status update requested:', {
@@ -42,6 +48,9 @@ exports.updatePaymentStatus = async (req, res) => {
     });
     
     const { status, transaction_id } = req.body;
+    
+    // Extract token from request header for authorization to Spring Boot API
+    const token = req.headers.authorization;
     
     // Check if payment exists before update
     const existingPayment = await Payment.findOne({ payment_id: req.params.id });
@@ -57,8 +66,6 @@ exports.updatePaymentStatus = async (req, res) => {
       { new: true }
     );
     
-
-    
     if (!payment) {
       console.log('❌ Payment not found:', req.params.id);
       return res.status(404).json({ message: 'Payment not found' });
@@ -66,31 +73,48 @@ exports.updatePaymentStatus = async (req, res) => {
     
     console.log('✅ Payment updated successfully:', payment);
     
-    // If payment is successful, update booking payment status
+    // If payment is successful, update booking payment status in MongoDB
     if (status === 'SUCCESS') {
       console.log('⭐️ Attempting to update booking:', payment.booking_id);
       
-      // Check if booking exists
-      const existingBooking = await Booking.findOne({ booking_id: payment.booking_id });
-      console.log('⭐️ Existing booking found:', existingBooking ? 'YES' : 'NO');
+      // Update booking in MongoDB
+      const updatedBooking = await Booking.findOneAndUpdate(
+        { booking_id: payment.booking_id },
+        { 
+          payment_status: 'PAID',
+          status: 'CONFIRMED'
+        },
+        { new: true }
+      );
       
-      if (existingBooking) {
+      console.log('✅ MongoDB Booking updated successfully:', updatedBooking);
+      
+      // Also update booking in Spring Boot
+      if (token && updatedBooking) {
         try {
-          const updatedBooking = await Booking.findOneAndUpdate(
-            { booking_id: payment.booking_id },
+          console.log('⭐️ Attempting to update booking in Spring Boot API');
+          
+          const springBootResponse = await axios.patch(
+            `${SPRING_BOOT_API_URL}/api/bookings/${payment.booking_id}/status`,
             { 
-              payment_status: 'PAID',
-              status: 'CONFIRMED'  // Also update the booking status
+              status: 'CONFIRMED',
+              paymentId: payment.payment_id 
             },
-            { new: true }
+            {
+              headers: {
+                'Authorization': token,
+                'Content-Type': 'application/json'
+              }
+            }
           );
           
-          console.log('✅ Booking updated successfully:', updatedBooking);
-        } catch (bookingError) {
-          console.error('❌ Failed to update booking:', bookingError);
+          console.log('✅ Spring Boot Booking updated successfully:', springBootResponse.data);
+        } catch (springBootError) {
+          console.error('❌ Failed to update Spring Boot booking:', springBootError.message);
+          // Note: We don't return an error here as the MongoDB update was successful
         }
       } else {
-        console.error('❌ Booking not found for payment:', payment.booking_id);
+        console.log('⚠️ No token available or booking not found, Spring Boot update skipped');
       }
     }
     

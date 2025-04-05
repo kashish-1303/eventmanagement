@@ -119,7 +119,7 @@
 
 // export default bookingService;
 import { nodeApi } from './api';
-
+const axios = require('axios')
 const createBooking = async (bookingData) => {
   // Set default status to PENDING and payment_status to UNPAID
   const bookingWithStatus = {
@@ -162,14 +162,46 @@ const getBookings = async (filters) => {
 };
 
 // Fixed to match your backend route pattern exactly
-const getUserBookings = async (userId) => {
+// const getUserBookings = async (userId) => {
+//   try {
+//     const response = await nodeApi.get(`/bookings/user/${userId}`);
+//     return response.data;
+//   } catch (error) {
+//     console.error("Error getting user bookings:", error);
+//     // Return empty array instead of throwing error
+//     return { data: [] };
+//   }
+// };
+// In eventzen-frontend/src/services/booking.service.js
+// Add a new function to fetch bookings from Spring Boot API
+const getUserBookingsFromSpringBoot = async (userId) => {
   try {
-    const response = await nodeApi.get(`/bookings/user/${userId}`);
+    // Assuming your Spring API has a similar endpoint
+    const response = await axios.get(`${process.env.REACT_APP_SPRING_API_URL}/api/users/${userId}/bookings`);
     return response.data;
   } catch (error) {
+    console.error("Error getting user bookings from Spring Boot:", error);
+    return [];
+  }
+};
+
+// Update the existing getUserBookings function to merge results
+const getUserBookings = async (userId) => {
+  try {
+    // Get bookings from Node.js backend
+    const nodeResponse = await nodeApi.get(`/bookings/user/${userId}`);
+    
+    // Get bookings from Spring Boot backend
+    const springBootBookings = await getUserBookingsFromSpringBoot(userId);
+    
+    // Combine and deduplicate bookings based on booking_id
+    const allBookings = [...nodeResponse.data];
+    
+    // Return the combined bookings
+    return allBookings;
+  } catch (error) {
     console.error("Error getting user bookings:", error);
-    // Return empty array instead of throwing error
-    return { data: [] };
+    return [];
   }
 };
 

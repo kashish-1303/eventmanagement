@@ -11,7 +11,16 @@ const Bookings = () => {
 
   useEffect(() => {
     if (user && user.id) {
+      // Fetch bookings when component mounts
       dispatch(fetchUserBookings(user.id));
+      
+      // Set up interval to refresh bookings every 30 seconds
+      const refreshInterval = setInterval(() => {
+        dispatch(fetchUserBookings(user.id));
+      }, 30000);
+      
+      // Clean up interval on unmount
+      return () => clearInterval(refreshInterval);
     }
   }, [dispatch, user]);
 

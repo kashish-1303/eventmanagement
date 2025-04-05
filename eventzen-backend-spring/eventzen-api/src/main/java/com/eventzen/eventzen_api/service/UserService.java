@@ -1,6 +1,6 @@
 package com.eventzen.eventzen_api.service;
 
-
+import com.eventzen.eventzen_api.security.JwtTokenProvider;
 
 import com.eventzen.eventzen_api.dto.UserDto;
 import com.eventzen.eventzen_api.entity.User;
@@ -21,6 +21,24 @@ public class UserService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired
+    private JwtTokenProvider jwtTokenProvider;
+    // In eventzen-backend-spring/eventzen-api/src/main/java/com/eventzen/eventzen_api/service/UserService.java
+public User getUserFromToken(String token) {
+    // Clean the token (remove "Bearer " prefix if present)
+    if (token.startsWith("Bearer ")) {
+        token = token.substring(7);
+    }
+    
+    // Get username from token
+    String username = jwtTokenProvider.getUsernameFromToken(token);
+    if (username == null) {
+        return null;
+    }
+    
+    // Find and return the user
+    return userRepository.findByUsername(username).orElse(null);
+}
 
     public UserDto createUser(String username, String email, String password, User.Role role) {
         User user = new User();
